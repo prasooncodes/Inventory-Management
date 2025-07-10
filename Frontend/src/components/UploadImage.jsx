@@ -33,7 +33,8 @@ function UploadImage({ uploadImage }) {
       <input
         type="file"
         id="fileInput"
-        className="hidden"
+        name="userImage"
+        className="sr-only"
         accept=".png, .jpeg, .jpg"
         required
         onChange={handleFileInputChange}

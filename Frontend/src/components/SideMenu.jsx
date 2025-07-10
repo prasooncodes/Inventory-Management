@@ -1,5 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import dashboardIcon from "../assets/dashboard-icon.png";
+import inventoryIcon from "../assets/inventory-icon.png";
+import purchaseIcon from "../assets/supplier-icon.png";
+import salesIcon from "../assets/supplier-icon.png";
+import storeIcon from "../assets/order-icon.png";
 
 function SideMenu() {
   const localStorageData = JSON.parse(localStorage.getItem("user"));
@@ -14,7 +19,7 @@ function SideMenu() {
           >
             <img
               alt="dashboard-icon"
-              src={require("../assets/dashboard-icon.png")}
+              src={dashboardIcon}
             />
             <span className="text-sm font-medium"> Dashboard </span>
           </Link>
@@ -25,7 +30,7 @@ function SideMenu() {
                 <div className="flex items-center gap-2">
                   <img
                     alt="inventory-icon"
-                    src={require("../assets/inventory-icon.png")}
+                    src={inventoryIcon}
                   />
                   <span className="text-sm font-medium"> Inventory </span>
                 </div>
@@ -39,7 +44,7 @@ function SideMenu() {
           >
             <img
               alt="purchase-icon"
-              src={require("../assets/supplier-icon.png")}
+              src={purchaseIcon}
             />
             <span className="text-sm font-medium"> Purchase Details</span>
           </Link>
@@ -47,7 +52,7 @@ function SideMenu() {
             to="/sales"
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           >
-            <img alt="sale-icon" src={require("../assets/supplier-icon.png")} />
+            <img alt="sale-icon" src={salesIcon} />
             <span className="text-sm font-medium"> Sales</span>
           </Link>
 
@@ -57,7 +62,7 @@ function SideMenu() {
                 <div className="flex items-center gap-2">
                   <img
                     alt="store-icon"
-                    src={require("../assets/order-icon.png")}
+                    src={storeIcon}
                   />
                   <span className="text-sm font-medium"> Manage Store </span>
                 </div>

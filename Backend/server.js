@@ -69,12 +69,23 @@ app.post("/api/register", (req, res) => {
   });
 
   registerUser
-    .save()
-    .then((result) => {
-      res.status(200).send(result);
-      alert("Signup Successfull");
-    })
-    .catch((err) => console.log("Signup: ", err));
+  .save()
+  .then((result) => {
+    console.log("Signup Successful");  // Use console.log instead
+    res.status(200).json({
+      success: true,
+      message: "Signup Successful",
+      data: result
+    });
+  })
+  .catch((err) => {
+    console.log("Signup: ", err);
+    res.status(500).json({
+      success: false,
+      message: "Signup Failed",
+      error: err.message
+    });
+  });
   console.log("request: ", req.body);
 });
 
