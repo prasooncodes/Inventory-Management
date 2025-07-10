@@ -45,28 +45,30 @@ function Dashboard() {
       },
       xaxis: {
         categories: [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
+          
         ],
       },
     },
     series: [
       {
         name: "series",
-        data: [10, 20, 40, 50, 60, 20, 10, 35, 45, 70, 25, 70],
+        data: [],
       },
     ],
   });
+
+  // Before rendering the chart, ensure data exists:
+  {chartData.series[0].data.length > 0 ? (
+    <ReactApexChart
+      options={chartData.options}
+      series={chartData.series}
+      type="bar"
+      width="500"
+    />
+  ) : (
+    <div>Loading chart data...</div>
+  )}
+
 
   // Update Chart Data
   const updateChartData = (salesData) => {
