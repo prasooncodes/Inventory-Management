@@ -58,16 +58,12 @@ function Dashboard() {
   });
 
   // Before rendering the chart, ensure data exists:
-  {chartData.series[0].data.length > 0 ? (
-    <ReactApexChart
-      options={chartData.options}
-      series={chartData.series}
-      type="bar"
-      width="500"
-    />
-  ) : (
-    <div>Loading chart data...</div>
-  )}
+  <Chart
+  options={chart.options}
+  series={chart.series}
+  type="bar"
+  width="500"
+/>
 
 
   // Update Chart Data

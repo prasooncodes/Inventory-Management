@@ -1,102 +1,52 @@
-const express = require("express");
-const { main } = require("./models/index");
-const productRoute = require("./router/product");
-const storeRoute = require("./router/store");
-const purchaseRoute = require("./router/purchase");
-const salesRoute = require("./router/sales");
-const cors = require("cors");
-const User = require("./models/users");
-const Product = require("./models/Product");
+require('dotenv').config();
+const mongoose = require("mongoose");
 
+async function main() {
+    try {
+        const uri = process.env.MONGODB_URI;
+        
+        // MongoDB Atlas connection options
+        const options = {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            retryWrites: true,
+            w: 'majority',
+            serverSelectionTimeoutMS: 30000, // Timeout after 30s
+            socketTimeoutMS: 45000, // Close sockets after 45s
+        };
 
-const app = express();
-const PORT = 4000;
-main();
-app.use(express.json());
-app.use(cors());
+        await mongoose.connect(uri, options);
+        console.log("Successfully connected to MongoDB Atlas");
 
-// Store API
-app.use("/api/store", storeRoute);
-
-// Products API
-app.use("/api/product", productRoute);
-
-// Purchase API
-app.use("/api/purchase", purchaseRoute);
-
-// Sales API
-app.use("/api/sales", salesRoute);
-
-// ------------- Signin --------------
-let userAuthCheck;
-app.post("/api/login", async (req, res) => {
-  console.log(req.body);
-  // res.send("hi");
-  try {
-    const user = await User.findOne({
-      email: req.body.email,
-      password: req.body.password,
-    });
-    console.log("USER: ", user);
-    if (user) {
-      res.send(user);
-      userAuthCheck = user;
-    } else {
-      res.status(401).send("Invalid Credentials");
-      userAuthCheck = null;
+    } catch (err) {
+        console.error("MongoDB connection error:", err);
+        throw err; // Propagate error to server.js
     }
-  } catch (error) {
-    console.log(error);
-    res.send(error);
-  }
+}
+
+// Add connection event handlers
+mongoose.connection.on('connected', () => {
+    console.log('MongoDB connected successfully');
 });
 
-// Getting User Details of login user
-app.get("/api/login", (req, res) => {
-  res.send(userAuthCheck);
-});
-// ------------------------------------
-
-// Registration API
-app.post("/api/register", (req, res) => {
-  let registerUser = new User({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    password: req.body.password,
-    phoneNumber: req.body.phoneNumber,
-    imageUrl: req.body.imageUrl,
-  });
-
-  registerUser
-  .save()
-  .then((result) => {
-    console.log("Signup Successful");  // Use console.log instead
-    res.status(200).json({
-      success: true,
-      message: "Signup Successful",
-      data: result
-    });
-  })
-  .catch((err) => {
-    console.log("Signup: ", err);
-    res.status(500).json({
-      success: false,
-      message: "Signup Failed",
-      error: err.message
-    });
-  });
-  console.log("request: ", req.body);
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
 });
 
-
-app.get("/testget", async (req,res)=>{
-  const result = await Product.findOne({ _id: '6429979b2e5434138eda1564'})
-  res.json(result)
-
-})
-
-// Here we are listening to the server
-app.listen(PORT, () => {
-  console.log("I am live again");
+mongoose.connection.on('disconnected', () => {
+    console.log('MongoDB disconnected');
 });
+
+// Handle application termination
+process.on('SIGINT', async () => {
+    try {
+        await mongoose.connection.close();
+        console.log('MongoDB connection closed through app termination');
+        process.exit(0);
+    } catch (err) {
+        console.error('Error closing MongoDB connection:', err);
+        process.exit(1);
+    }
+});
+
+module.exports = { main };

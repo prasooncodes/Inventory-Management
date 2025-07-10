@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import AddProduct from "../components/AddProduct";
 import UpdateProduct from "../components/UpdateProduct";
 import AuthContext from "../AuthContext";
+import searchIcon from "../assets/search-icon.png"; 
 
 function Inventory() {
   const [showProductModal, setShowProductModal] = useState(false);
@@ -195,7 +196,7 @@ function Inventory() {
                 <img
                   alt="search-icon"
                   className="w-5 h-5"
-                  src={require("../assets/search-icon.png")}
+                  src={searchIcon}
                 />
                 <input
                   className="border-none outline-none focus:border-none text-xs"
