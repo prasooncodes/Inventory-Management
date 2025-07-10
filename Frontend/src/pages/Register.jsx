@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import UploadImage from "../components/UploadImage";
+import logoImage from "../assets/logo.png";
+import loginImage from "../assets/Login.png";
 
 function Register() {
   const [form, setForm] = useState({
@@ -10,6 +12,7 @@ function Register() {
     password: "",
     phoneNumber: "",
     imageUrl: "",
+    termsAccepted: false,
   });
 
   const navigate = useNavigate();
@@ -67,7 +70,7 @@ function Register() {
           <div>
             <img
               className="mx-auto h-12 w-auto"
-              src={require("../assets/logo.png")}
+              src={logoImage}
               alt="Your Company"
             />
             <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
@@ -142,10 +145,14 @@ function Register() {
               <div className="flex items-center">
                 <input
                   id="remember-me"
-                  name="remember-me"
+                  name="termsAccepted"
                   type="checkbox"
                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                  checked
+                  checked={form.termsAccepted}
+                  onChange={(e) => setForm({ ...form, termsAccepted: e.target.checked })}
+                  // This checkbox is for accepting terms and conditions
+                  // It is not a required field in the backend, but we can use it to show
+                  // that the user has accepted the terms and conditions
                   required
                 />
                 <label
@@ -192,7 +199,7 @@ function Register() {
           </form>
         </div>
         <div className="flex justify-center order-first sm:order-last">
-          <img src={require("../assets/Login.png")} alt="" />
+          <img src={loginImage} alt="" />
         </div>
       </div>
     </>
