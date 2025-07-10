@@ -1,4 +1,4 @@
-import { Fragment, useContext } from "react";
+import { Fragment, useContext, useState, useEffect } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import AuthContext from "../AuthContext";
@@ -21,7 +21,22 @@ function classNames(...classes) {
 
 export default function Header() {
   const authContext = useContext(AuthContext);
-  const localStorageData = JSON.parse(localStorage.getItem("user"));
+  const [userData, setUserData] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    const localStorageData = JSON.parse(localStorage.getItem("user"));
+    if (localStorageData) {
+      setUserData(localStorageData);
+      setImageUrl(localStorageData.imageUrl);
+    }
+  }, []);
+
+  const handleImageError = (e) => {
+    e.target.src = "/default-avatar.png";
+    e.target.onerror = null;
+  };
+
   return (
     <>
       <div className="min-h-full">
@@ -37,6 +52,7 @@ export default function Header() {
                           className="h-8 w-8"
                           src={logoImage}
                           alt="Inventory Management System"
+                          onError={handleImageError}
                         />
                         <span className="font-bold text-white italic">
                           Inventory Management
@@ -59,11 +75,12 @@ export default function Header() {
                         <div>
                           <Menu.Button className="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                             <span className="sr-only">Open user menu</span>
-                            {imageUrl ? (
-                              <img src={imageUrl} alt="Profile" />
-                            ) : (
-                              <img src="/default-avatar.png" alt="Default Profile" />
-                            )}
+                            <img
+                              className="h-8 w-8 rounded-full"
+                              src={imageUrl || "/default-avatar.png"}
+                              alt="Profile"
+                              onError={handleImageError}
+                            />
                           </Menu.Button>
                         </div>
                         <Transition
@@ -85,10 +102,9 @@ export default function Header() {
                                       active ? "bg-gray-100" : "",
                                       "block px-4 py-2 text-sm text-gray-700"
                                     )}
+                                    onClick={() => authContext.signout()}
                                   >
-                                    <span onClick={() => authContext.signout()}>
-                                      {item.name}{" "}
-                                    </span>
+                                    {item.name}
                                   </Link>
                                 )}
                               </Menu.Item>
@@ -103,15 +119,9 @@ export default function Header() {
                     <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="sr-only">Open main menu</span>
                       {open ? (
-                        <XMarkIcon
-                          className="block h-6 w-6"
-                          aria-hidden="true"
-                        />
+                        <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
                       ) : (
-                        <Bars3Icon
-                          className="block h-6 w-6"
-                          aria-hidden="true"
-                        />
+                        <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
                       )}
                     </Disclosure.Button>
                   </div>
@@ -123,9 +133,7 @@ export default function Header() {
                   {navigation.map((item) => (
                     <Link to={item.href} key={item.name}>
                       <Disclosure.Button
-                        key={item.name}
                         as="a"
-                        // href={item.href}
                         className={classNames(
                           item.current
                             ? "bg-gray-900 text-white"
@@ -140,32 +148,33 @@ export default function Header() {
                   ))}
                 </div>
                 <div className="border-t border-gray-700 pt-4 pb-3">
-                  <div className="flex items-center px-5">
-                    <div className="flex-shrink-0">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={localStorageData.imageUrl}
-                        alt="profile"
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">
-                        {localStorageData.firstName +
-                          " " +
-                          localStorageData.lastName}
+                  {userData && (
+                    <div className="flex items-center px-5">
+                      <div className="flex-shrink-0">
+                        <img
+                          className="h-10 w-10 rounded-full"
+                          src={imageUrl || "/default-avatar.png"}
+                          alt="profile"
+                          onError={handleImageError}
+                        />
                       </div>
-                      <div className="text-sm font-medium leading-none text-gray-400">
-                        {localStorageData.email}
+                      <div className="ml-3">
+                        <div className="text-base font-medium leading-none text-white">
+                          {`${userData.firstName} ${userData.lastName}`}
+                        </div>
+                        <div className="text-sm font-medium leading-none text-gray-400">
+                          {userData.email}
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        className="ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                      >
+                        <span className="sr-only">View notifications</span>
+                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    >
-                      <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
+                  )}
                   <div className="mt-3 space-y-1 px-2">
                     {userNavigation.map((item) => (
                       <Disclosure.Button
@@ -173,10 +182,9 @@ export default function Header() {
                         as="a"
                         href={item.href}
                         className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                        onClick={() => authContext.signout()}
                       >
-                        <span onClick={() => authContext.signout()}>
-                          {item.name}{" "}
-                        </span>
+                        {item.name}
                       </Disclosure.Button>
                     ))}
                   </div>
