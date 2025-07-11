@@ -6,6 +6,7 @@ const productRoute = require("./router/product");
 const storeRoute = require("./router/store");
 const purchaseRoute = require("./router/purchase");
 const salesRoute = require("./router/sales");
+const authRoute = require("./router/auth");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -37,6 +38,7 @@ app.use("/api/store", storeRoute);
 app.use("/api/product", productRoute);
 app.use("/api/purchase", purchaseRoute);
 app.use("/api/sales", salesRoute);
+app.use("/api/", authRoute);
 
 // Basic route for testing
 app.get('/', (req, res) => {
