@@ -18,18 +18,18 @@ const App = () => {
   const [user, setUser] = useState("");
   const [loader, setLoader] = useState(true);
   let myLoginUser = JSON.parse(localStorage.getItem("user"));
-  // console.log("USER: ",user)
-
-  useEffect(() => {
-    if (myLoginUser) {
-      setUser(myLoginUser._id);
-      setLoader(false);
-      // console.log("inside effect", myLoginUser)
-    } else {
-      setUser("");
-      setLoader(false);
-    }
-  }, [myLoginUser]);
+    // console.log("USER: ",user)
+  
+    useEffect(() => {
+      if (myLoginUser) {
+        setUser(myLoginUser._id);
+        setLoader(false);
+        // console.log("inside effect", myLoginUser)
+      } else {
+        setUser("");
+        setLoader(false);
+      }
+    }, [localStorage.getItem("user")]);
 
   const signin = (newUser, callback) => {
     setUser(newUser);
