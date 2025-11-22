@@ -1,70 +1,67 @@
-const Sales = require("../models/sales");
-const soldStock = require("../controller/soldStock");
+const Sales = require('../models/sales');
+const Product = require('../models/product');
 
-// Add Sales
-const addSales = (req, res) => {
-  const addSale = new Sales({
-    userID: req.body.userID,
-    ProductID: req.body.productID,
-    StoreID: req.body.storeID,
-    StockSold: req.body.stockSold,
-    SaleDate: req.body.saleDate,
-    TotalSaleAmount: req.body.totalSaleAmount,
-  });
-
-  addSale
-    .save()
-    .then((result) => {
-      soldStock(req.body.productID, req.body.stockSold);
-      res.status(200).send(result);
-    })
-    .catch((err) => {
-      res.status(402).send(err);
-    });
-};
-
-// Get All Sales Data
-const getSalesData = async (req, res) => {
-  const findAllSalesData = await Sales.find({"userID": req.params.userID})
-    .sort({ _id: -1 })
-    .populate("ProductID")
-    .populate("StoreID"); // -1 for descending order
-  res.json(findAllSalesData);
-};
-
-// Get total sales amount
-const getTotalSalesAmount = async(req,res) => {
-  let totalSaleAmount = 0;
-  const salesData = await Sales.find({"userID": req.params.userID});
-  salesData.forEach((sale)=>{
-    totalSaleAmount += sale.TotalSaleAmount;
-  })
-  res.json({totalSaleAmount});
-
-}
-
-const getMonthlySales = async (req, res) => {
+exports.createBill = async (req, res) => {
   try {
-    const sales = await Sales.find();
+    const {
+      items,
+      paymentMethod,
+      totalAmount
+    } = req.body;
 
-    // Initialize array with 12 zeros
-    const salesAmount = [];
-    salesAmount.length = 12;
-    salesAmount.fill(0)
+    // Validate stock availability
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for product: ${product.name}`
+        });
+      }
+    }
 
-    sales.forEach((sale) => {
-      const monthIndex = parseInt(sale.SaleDate.split("-")[1]) - 1;
-
-      salesAmount[monthIndex] += sale.TotalSaleAmount;
+    // Create bill and update stock
+    const bill = new Sales({
+      items: items.map(item => ({
+        product: item.productId,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      paymentMethod,
+      totalAmount,
+      userID: req.user._id
     });
 
-    res.status(200).json({ salesAmount });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    // Update stock levels
+    for (const item of items) {
+      await Product.findByIdAndUpdate(
+        item.productId,
+        { $inc: { stock: -item.quantity } }
+      );
+    }
+
+    await bill.save();
+
+    // Generate invoice format for printing
+    const invoiceData = {
+      billNo: bill._id,
+      date: bill.createdAt,
+      items: await Promise.all(items.map(async (item) => {
+        const product = await Product.findById(item.productId);
+        return {
+          name: product.name,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.quantity * item.price
+        };
+      })),
+      total: totalAmount
+    };
+
+    res.status(201).json({
+      message: "Bill created successfully",
+      invoice: invoiceData
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
-
-
-
-module.exports = { addSales, getMonthlySales, getSalesData,  getTotalSalesAmount};
